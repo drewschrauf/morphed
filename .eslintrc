@@ -1,0 +1,11 @@
+{
+    "extends": ["defaults"],
+    "env": {
+        "node": true,
+        "mocha": true,
+        "browser": true
+    },
+    "rules": {
+        "semi": [2, "always"]
+    }
+}
