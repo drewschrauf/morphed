@@ -1,6 +1,6 @@
 # Morphed
 
-Morphed lets you mimic pure rendering of a DOM element while still letting you use your favourite DOM manipulation library. Each time your `render` callback is invoked it receives a fresh copy of the initial DOM node, allowing you to make your changes from scratch each time. Behind the scenes, [morphdom](https://github.com/patrick-steele-idem/morphdom) is used to perform the minimal set of DOM manipulations between the current state and the new state.
+Morphed lets you mimic pure rendering of a DOM node while still letting you use your favourite DOM manipulation library. Each time your `render` callback is invoked it receives a fresh copy of the initial node, allowing you to make your changes from scratch each time. Behind the scenes, [morphdom](https://github.com/patrick-steele-idem/morphdom) is used to perform the minimal set of DOM manipulations between the current state and the new state.
 
 Morphed expects to be running in a Browserify, Webpack or similar environment.
 
@@ -38,8 +38,8 @@ Morphed attempts to get the best of both worlds by passing a copy of the same in
 
 The `Morphed` constructor supports the following arguments:
 
-- _node_ (`Node`, required) - The DOM node to be returned on each call to `render`.
-- _renderFunction_ (`Function(Node[, state])`, required) - The render function to be invoked on each call to render. The first parameter, `Node`, will be always be the initial DOM node. The second parameter, `state`, is optional and its usage is described in the State API section. All manipulations applied to the passed `node` will be applied to the DOM.
+- _node_ (`Node`, required) - The node to be updated on each call to `render`.
+- _renderFunction_ (`Function(Node[, state])`, required) - The render function to be invoked on each call to render. The first parameter, `Node`, will be always be the initial node. The second parameter, `state`, is optional and its usage is described in the State API section. All manipulations applied to the passed `Node` will be applied to the DOM.
 - _options_ (`Object`, optional) - See below for supported options.
 
 Supported options:
@@ -47,7 +47,7 @@ Supported options:
 - _morphdom_ (`Object`) - This object gets passed through to morphdom. See the [morphdom API documentation](https://github.com/patrick-steele-idem/morphdom#api) for supported options.
 - _ignoreAttribute_ (`String`, default `morphed-ignore`) - Change the attribute used to flag a node to be ignored by morphdom. See the Caveats section for the usage of the parameter.
 - _initialState_ (`Object`) - Provide an initial state for use with the State API. See the State API section for details.
-- _clone_ (`Boolean`, default `true`) - Set this to false to avoid the overhead of cloning DOM nodes. You must instead return a node from the `renderFunction`. Use this with a templating library to generate elements that don't need to be prerendered in the page's source. The `renderFunction` callback will not be passed the DOM node, the state becomes the first parameter.
+- _clone_ (`Boolean`, default `true`) - Set this to false to avoid the overhead of cloning DOM nodes. You must instead return a node from the `renderFunction`. Use this with a templating library to generate elements that don't need to be prerendered in the page's source. The `renderFunction` callback will not be passed a node, the state becomes the first parameter.
 
 ### render()
 
@@ -105,9 +105,9 @@ Depending on the type of DOM manipulations you are making, some cached queries o
     // this should continue to work regardless of what happens to the DOM
     $myNode.on('click', 'button', function() {...});
 
-Some DOM elements are stateful and will lose their current value if they are rerendered. The most obvious examples of this are form input controls. There are two things you can do here to work around this issue. The first is to add a `change` listener to the input and store the value yourself. This is a common (in fact, required) pattern in React and allows you to simply update the element with the real value on each render callback. If you don't want to add a host of callbacks for your inputs, you can tell Morphed to ignore any manipulations made to a particular element by adding the attribute `Morphed-ignore`. Any changes made in the render callback to an element with this attribute will not be reflected in the real DOM. All modifications to this element will need to be performed outside of the Morphed render callback.
+Some elements are stateful and will lose their current value if they are rerendered. The most obvious examples of this are form input controls. There are two things you can do here to work around this issue. The first is to add a `change` listener to the input and store the value yourself. This is a common (in fact, required) pattern in React and allows you to simply update the element with the real value on each render callback. If you don't want to add a host of callbacks for your inputs, you can tell Morphed to ignore any manipulations made to a particular element by adding the attribute `morphed-ignore`. Any changes made in the render callback to an element with this attribute will not be reflected in the real DOM. All modifications to this element will need to be performed outside of the Morphed render callback.
 
-Due to the way morphdom works, jQuery animations will no longer work. Most of the time these animations can be replaced with CSS animations triggered by a class change. When you find yourself in a situation where this won't work and absoloutely must use a javascript animation, make sure you ignore the animated node with `Morphed-ignore`. Be aware, children of this node will be ignored too.
+Due to the way morphdom works, jQuery animations will no longer work. Most of the time these animations can be replaced with CSS animations triggered by a class change. When you find yourself in a situation where this won't work and absoloutely must use a javascript animation, make sure you ignore the animated node with `morphed-ignore`. Be aware, children of this node will be ignored too.
 
 ## Contribute
 
