@@ -1,5 +1,6 @@
 {
   "name": "morphed",
+  "repository": "drewschrauf/morphed",
   "version": "0.1.0",
   "description": "Mimic pure rendering with a cloned DOM node",
   "main": "src/Morphed.js",
