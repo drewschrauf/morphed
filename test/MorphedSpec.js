@@ -27,7 +27,7 @@ describe('Morphed', function() {
         it('should copy input parameters', function() {
             var f = new Morphed(root, noop);
             expect(f.node).to.not.be.undefined;
-            expect(f.renderFunc).to.be.a('function');
+            expect(f.updateFunc).to.be.a('function');
             expect(f.options).to.be.an('object');
         });
 
@@ -43,10 +43,10 @@ describe('Morphed', function() {
             }).to.throw('First argument must be a Node');
         });
 
-        it('should throw if render function is not passed', function() {
+        it('should throw if update function is not passed', function() {
             expect(function() {
                 new Morphed(root);
-            }).to.throw('Render function is required');
+            }).to.throw('Update function is required');
         });
 
         it('should set up initial state', function() {
@@ -55,37 +55,37 @@ describe('Morphed', function() {
         });
     });
 
-    describe('#render', function() {
+    describe('#update', function() {
         var morphed;
-        var render;
+        var update;
         beforeEach(function() {
-            render = sinon.spy(function(node) {
+            update = sinon.spy(function(node) {
                 node.innerHTML = 'New Text';
             });
-            morphed = new Morphed(root, render, {initialState: {test: 'testing'}});
+            morphed = new Morphed(root, update, {initialState: {test: 'testing'}});
         });
 
-        it('should provide a render function', function() {
-            expect(morphed.render).to.be.a('function');
+        it('should provide an update function', function() {
+            expect(morphed.update).to.be.a('function');
         });
 
-        it('should invoke the passed renderFunc', function() {
-            morphed.render();
-            expect(render).to.have.been.called;
+        it('should invoke the passed updateFunc', function() {
+            morphed.update();
+            expect(update).to.have.been.called;
         });
 
-        it('should apply the results of the renderFunc', function() {
-            morphed.render();
+        it('should apply the results of the updateFunc', function() {
+            morphed.update();
             expect(root.innerHTML).to.equal('New Text');
         });
 
         it('should not replace the original element', function() {
             var oldRoot = root;
-            morphed.render();
+            morphed.update();
             expect(root).to.equal(oldRoot);
         });
 
-        it('should always pass the original node to the renderFunc', function() {
+        it('should always pass the original node to the updateFunc', function() {
             var el = document.createElement('div');
             el.innerHTML = 'Old Text';
 
@@ -94,33 +94,33 @@ describe('Morphed', function() {
                 node.innerHTML = 'New Text';
             });
 
-            // render multiple times
+            // update multiple times
             expect(el.innerHTML).to.equal('New Text');
-            morphed.render();
+            morphed.update();
         });
 
-        it('should pass the current state to the render function', function() {
-            morphed.render();
-            expect(render.args[0][1]).to.eql({test: 'testing'});
+        it('should pass the current state to the update function', function() {
+            morphed.update();
+            expect(update.args[0][1]).to.eql({test: 'testing'});
         });
 
-        describe('render without clone', function() {
+        describe('update without clone', function() {
             beforeEach(function() {
-                render = sinon.spy(function() {
+                update = sinon.spy(function() {
                     var el = document.createElement('div');
                     el.innerHTML = 'New Text';
                     return el;
                 });
-                morphed = new Morphed(root, render, {initialState: {test: 'testing'}, clone: false});
+                morphed = new Morphed(root, update, {initialState: {test: 'testing'}, clone: false});
             });
 
-            it('should pass the state as the first parameter to the renderFunc', function() {
-                morphed.render();
-                expect(render.args[0][0]).to.eql({test: 'testing'});
+            it('should pass the state as the first parameter to the updateFunc', function() {
+                morphed.update();
+                expect(update.args[0][0]).to.eql({test: 'testing'});
             });
 
             it('should render returned element', function() {
-                morphed.render();
+                morphed.update();
                 expect(root.innerHTML).to.equal('New Text');
             });
         });
@@ -135,7 +135,7 @@ describe('Morphed', function() {
                     '<div existing-id id="test">Ignored</div>';
                 complexRoot = el;
             });
-            var renderFunc = function(node) {
+            var updateFunc = function(node) {
                 node.querySelector('[morphed-ignore]').innerHTML = 'Changed';
                 node.querySelector('[custom-ignore]').innerHTML = 'Changed';
             };
@@ -151,13 +151,13 @@ describe('Morphed', function() {
             });
 
             it('should not apply modifications to ignored elements', function() {
-                morphed = new Morphed(complexRoot, renderFunc);
+                morphed = new Morphed(complexRoot, updateFunc);
                 expect(complexRoot.querySelector('[morphed-ignore]').innerHTML).to.equal('Ignored');
                 expect(complexRoot.querySelector('[custom-ignore]').innerHTML).to.equal('Changed');
             });
 
             it('should allow the ignored data attribute to be overridden', function() {
-                morphed = new Morphed(complexRoot, renderFunc, {
+                morphed = new Morphed(complexRoot, updateFunc, {
                     ignoredAttribute: 'custom-ignore'
                 });
                 expect(complexRoot.querySelector('[morphed-ignore]').innerHTML).to.equal('Changed');
@@ -168,7 +168,7 @@ describe('Morphed', function() {
                 var obme = sinon.spy(function() {
                     return true;
                 });
-                morphed = new Morphed(complexRoot, renderFunc, {
+                morphed = new Morphed(complexRoot, updateFunc, {
                     morphdom: {
                         onBeforeMorphEl: obme
                     }
@@ -190,7 +190,7 @@ describe('Morphed', function() {
             });
 
             it('should pass morphdom arguments to morphdom', function() {
-                morphedr.render();
+                morphedr.update();
                 expect(morphdom).to.have.been.called;
                 expect(morphdom.args[0][2].test).to.not.be.undefined;
             });
@@ -198,10 +198,10 @@ describe('Morphed', function() {
     });
 
     describe('#setState', function() {
-        var morphed, render;
+        var morphed, update;
         beforeEach(function() {
-            render = sinon.spy();
-            morphed = new Morphed(root, render, {initialState: {test: 'testing'}});
+            update = sinon.spy();
+            morphed = new Morphed(root, update, {initialState: {test: 'testing'}});
         });
 
         it('should extend the current state with the new state', function() {
@@ -214,17 +214,17 @@ describe('Morphed', function() {
             expect(morphed.state).to.eql({test: 'again'});
         });
 
-        it('should cause a rerender when the state is changed', function() {
+        it('should cause an update when the state is changed', function() {
             morphed.setState({});
-            expect(render).to.have.been.called;
+            expect(update).to.have.been.called;
         });
     });
 
     describe('#replaceState', function() {
-        var morphed, render;
+        var morphed, update;
         beforeEach(function() {
-            render = sinon.spy();
-            morphed = new Morphed(root, render, {initialState: {test: 'testing'}});
+            update = sinon.spy();
+            morphed = new Morphed(root, update, {initialState: {test: 'testing'}});
         });
 
         it('should replace the current state with the new state', function() {
@@ -232,9 +232,9 @@ describe('Morphed', function() {
             expect(morphed.state).to.eql({foo: 'bar'});
         });
 
-        it('should cause a rerender when the state is changed', function() {
+        it('should cause an update when the state is changed', function() {
             morphed.replaceState({});
-            expect(render).to.have.been.called;
+            expect(update).to.have.been.called;
         });
     });
 });

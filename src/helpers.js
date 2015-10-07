@@ -11,6 +11,6 @@ exports.setupIgnored = function(node, attribute) {
     }
 };
 
-exports.shouldRerender = function(node, attribute) {
+exports.shouldUpdate = function(node, attribute) {
     return !node.attributes.hasOwnProperty(attribute);
 };

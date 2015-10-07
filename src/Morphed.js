@@ -2,15 +2,15 @@ var morphdom = require('morphdom');
 var objectAssign = require('object-assign');
 var helpers = require('./helpers');
 
-var Morphed = function(node, renderFunc, options) {
+var Morphed = function(node, updateFunc, options) {
     if (!node) {
         throw new Error('Node is required.');
     }
     if (!node.nodeName) {
         throw new Error('First argument must be a Node.');
     }
-    if (!renderFunc) {
-        throw new Error('Render function is required.');
+    if (!updateFunc) {
+        throw new Error('Update function is required.');
     }
 
     var defaultOpts = {
@@ -20,15 +20,15 @@ var Morphed = function(node, renderFunc, options) {
     };
 
     this.node = node;
-    this.renderFunc = renderFunc;
+    this.updateFunc = updateFunc;
     this.options = objectAssign({}, defaultOpts, options);
 
     // set up the custom ignore handler
     var passedOBME = this.options.morphdom.onBeforeMorphEl;
     this.options.morphdom.onBeforeMorphEl = function(fromNode, toNode) {
-            var shouldRender = helpers.shouldRerender(fromNode, this.options.ignoredAttribute);
-            if (shouldRender && passedOBME) passedOBME(fromNode, toNode);
-            return shouldRender;
+            var shouldUpdate = helpers.shouldUpdate(fromNode, this.options.ignoredAttribute);
+            if (shouldUpdate && passedOBME) passedOBME(fromNode, toNode);
+            return shouldUpdate;
     }.bind(this);
 
     // set up initial state
@@ -41,31 +41,31 @@ var Morphed = function(node, renderFunc, options) {
     }
     this.state = objectAssign({}, this.options.initialState);
 
-    // force an initial render
-    this.render();
+    // force an initial update
+    this.update();
 };
 
-Morphed.prototype.render = function() {
+Morphed.prototype.update = function() {
     var newNode;
     if (this.options.clone) {
-        // Morphed renders do clone the initial dom and allow mutations
+        // Morphed updates do clone the initial dom and allow mutations
         newNode = this.initialDom.cloneNode(true);
-        this.renderFunc(newNode, this.state);
+        this.updateFunc(newNode, this.state);
     } else {
-        // pure renders do not clone, just return an element
-        newNode = this.renderFunc(this.state);
+        // pure udpates do not clone, just return an element
+        newNode = this.updateFunc(this.state);
     }
     this.node = morphdom(this.node, newNode, this.options.morphdom);
 };
 
 Morphed.prototype.setState = function(state) {
     this.state = objectAssign({}, this.state, state);
-    this.render();
+    this.update();
 };
 
 Morphed.prototype.replaceState = function(state) {
     this.state = objectAssign({}, state);
-    this.render();
+    this.update();
 };
 
 module.exports = Morphed;
