@@ -8,23 +8,23 @@ Morphed expects to be running in a Browserify, Webpack or similar environment.
 
 jQuery is used here for demonstration purposes but it is not required by Morphed.
 ```javascript
-    var $ = require('jquery');
-    var Morphed = require('morphed');
+var $ = require('jquery');
+var Morphed = require('morphed');
 
-    // get our element and set up some state
-    var $module = $('#my-module');
-    var counter = 0;
+// get our element and set up some state
+var $module = $('#my-module');
+var counter = 0;
 
-    // set up an instance of Morphed with the DOM node and an update function
-    var morphed = new Morphed($module[0], function(node) {
-        $('.display', node).text('Count: ' + counter);
-    });
+// set up an instance of Morphed with the DOM node and an update function
+var morphed = new Morphed($module[0], function(node) {
+    $('.display', node).text('Count: ' + counter);
+});
 
-    // attach a click handler to an increment button
-    $module.on('click', '.increment', function() {
-        counter++;
-        morphed.update(); // invoke the update
-    });
+// attach a click handler to an increment button
+$module.on('click', '.increment', function() {
+    counter++;
+    morphed.update(); // invoke the update
+});
 ```
 
 ## Motivation
@@ -75,22 +75,22 @@ Replaces the current state with the passed state. Calling this function will tri
 Here is the same example as above using `setState` to track the count.
 
 ```javascript
-    var $ = require('jquery');
-    var Morphed = require('morphed');
+var $ = require('jquery');
+var Morphed = require('morphed');
 
-    var $module = $('#my-module');
+var $module = $('#my-module');
 
-    var morphed = new Morphed($module[0], function(node, state) {
-        $('.display', node).text('Count: ' + state.count);
-    }, {
-        initialState: {
-            count: 0
-        }
-    });
+var morphed = new Morphed($module[0], function(node, state) {
+    $('.display', node).text('Count: ' + state.count);
+}, {
+    initialState: {
+        count: 0
+    }
+});
 
-    $module.on('click', '.increment', function() {
-        morphed.setState({count: morphed.state.count + 1});
-    });
+$module.on('click', '.increment', function() {
+    morphed.setState({count: morphed.state.count + 1});
+});
 ```
 
 ## Caveats
@@ -100,14 +100,14 @@ Using Morphed isn't without its pitfalls but many of them have simple workaround
 Depending on the type of DOM manipulations you are making, some cached queries or event handlers may be pointing to nodes that are no longer rendered. The key here is to use event delegation to handle events. In jQuery, this can be achieved using `.on` and attaching the handler to the same node that is passed to Morphed, or one wrapping it. For example:
 
 ```javascript
-    $myNode = $('#my-node');
-    var morphed = new Morphed($myNode[0], function() {...});
+$myNode = $('#my-node');
+var morphed = new Morphed($myNode[0], function() {...});
 
-    // this could break if the button node is morphed
-    $('button', $myNode).on('click', function() {...}));
+// this could break if the button node is morphed
+$('button', $myNode).on('click', function() {...}));
 
-    // this should continue to work regardless of what happens to the DOM
-    $myNode.on('click', 'button', function() {...});
+// this should continue to work regardless of what happens to the DOM
+$myNode.on('click', 'button', function() {...});
 ```
 
 Some elements are stateful and will lose their current value if they are rerendered. The most obvious examples of this are form input controls. There are two things you can do here to work around this issue. The first is to add a `change` listener to the input and store the value yourself. This is a common (in fact, required) pattern in React and allows you to simply update the element with the real value on each update callback. If you don't want to add a host of callbacks for your inputs, you can tell Morphed to ignore any manipulations made to a particular element by adding the attribute `morphed-ignore`. Any changes made in the update callback to an element with this attribute will not be reflected in the real DOM. All modifications to this element will need to be performed outside of the Morphed update callback.
