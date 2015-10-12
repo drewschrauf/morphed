@@ -27,7 +27,7 @@ var Morphed = function(node, updateFunc, options) {
     var passedOBME = this.options.morphdom.onBeforeMorphEl;
     this.options.morphdom.onBeforeMorphEl = function(fromNode, toNode) {
             var shouldUpdate = helpers.shouldUpdate(fromNode, this.options.ignoredAttribute);
-            if (shouldUpdate && passedOBME) passedOBME(fromNode, toNode);
+            if (shouldUpdate && passedOBME) shouldUpdate = passedOBME(fromNode, toNode);
             return shouldUpdate;
     }.bind(this);
 

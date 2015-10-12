@@ -166,7 +166,7 @@ describe('Morphed', function() {
 
             it('should still invoke a custom onBeforeMorphEl', function() {
                 var obme = sinon.spy(function() {
-                    return true;
+                    return false;
                 });
                 morphed = new Morphed(complexRoot, updateFunc, {
                     morphdom: {
@@ -174,7 +174,7 @@ describe('Morphed', function() {
                     }
                 });
                 expect(complexRoot.querySelector('[morphed-ignore]').innerHTML).to.equal('Ignored');
-                expect(complexRoot.querySelector('[custom-ignore]').innerHTML).to.equal('Changed');
+                expect(complexRoot.querySelector('[custom-ignore]').innerHTML).to.equal('Ignored');
                 expect(obme).to.have.been.called;
             });
         });
